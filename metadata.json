@@ -1,0 +1,6 @@
+{
+  "name": "UniUni Shipping API Hub",
+  "description": "Production-ready developer console and shipping management tool for UniUni Logistics API (Canada & US). Create shipments, purchase 4x6 labels, track parcels in real time, calculate rates, validate postal sort codes, and test endpoints.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
