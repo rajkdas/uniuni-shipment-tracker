@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Shipment, ScanEvent, UniUniConfig } from '../types/uniuni';
+import { UniUniApiClient } from '../services/apiClient';
 import {
   Search,
   Truck,
@@ -77,8 +78,7 @@ export const TrackingView: React.FC<TrackingViewProps> = ({
     const start = Date.now();
 
     try {
-      const res = await fetch(`/api/uniuni/tracking/${encodeURIComponent(id)}`);
-      const data = await res.json();
+      const data = await UniUniApiClient.getTracking(id);
       setLastApiLatency(Date.now() - start || 38);
       if (data.success && data.data) {
         setActiveTracking(data.data);

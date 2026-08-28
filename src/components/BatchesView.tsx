@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BatchManifest, Shipment } from '../types/uniuni';
+import { UniUniApiClient } from '../services/apiClient';
 import { Layers, Printer, Plus, CheckCircle2, Truck, FileText, Calendar, Box, User, X } from 'lucide-react';
 import JsBarcode from 'jsbarcode';
 
@@ -21,8 +22,7 @@ export const BatchesView: React.FC<BatchesViewProps> = ({ shipments }) => {
 
   const fetchBatches = async () => {
     try {
-      const res = await fetch('/api/uniuni/batches');
-      const data = await res.json();
+      const data = await UniUniApiClient.getBatches();
       if (data.success && data.batches) {
         setBatches(data.batches);
       }
@@ -40,17 +40,12 @@ export const BatchesView: React.FC<BatchesViewProps> = ({ shipments }) => {
     }
 
     try {
-      const res = await fetch('/api/uniuni/batches', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          shipmentIds: selectedShipmentIds,
-          hubCode,
-          driverName,
-        }),
+      const data = await UniUniApiClient.createBatch({
+        shipmentIds: selectedShipmentIds,
+        hubCode,
+        driverName,
       });
 
-      const data = await res.json();
       if (data.success) {
         setIsCreatingModal(false);
         setSelectedShipmentIds([]);

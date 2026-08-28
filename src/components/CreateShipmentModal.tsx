@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Address, CountryCode, ParcelDetails, ShipmentLineItem } from '../types/uniuni';
 import { getUniUniSortCode, calculateUniUniRates } from '../utils/uniuniRouting';
+import { UniUniApiClient } from '../services/apiClient';
 import { X, Box, User, MapPin, DollarSign, Sparkles, Check, ArrowRight, Shield } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -195,28 +196,19 @@ export const CreateShipmentModal: React.FC<CreateShipmentModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/uniuni/shipments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderNumber,
-          serviceType,
-          sender,
-          recipient,
-          package: pkg,
-          shipmentLineItems: lineItems,
-          rate: selectedRate ? selectedRate.cost : 5.85,
-        }),
+      const data = await UniUniApiClient.createShipment({
+        orderNumber,
+        serviceType,
+        sender,
+        recipient,
+        package: pkg,
+        shipmentLineItems: lineItems,
+        rate: selectedRate ? selectedRate.cost : 5.85,
       });
-
-      const data = await res.json();
 
       if (data.success) {
         if (autoPurchase && data.shipment?.id) {
-          await fetch(`/api/uniuni/shipments/${data.shipment.id}/purchase`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-          });
+          await UniUniApiClient.purchaseShipment(data.shipment.id);
         }
 
         confetti({

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { WebhookEventRecord, Shipment } from '../types/uniuni';
+import { UniUniApiClient } from '../services/apiClient';
 import {
   Webhook,
   Play,
@@ -34,8 +35,7 @@ export const WebhookView: React.FC<WebhookViewProps> = ({ shipments }) => {
 
   const fetchLogs = async () => {
     try {
-      const res = await fetch('/api/uniuni/webhooks/logs');
-      const data = await res.json();
+      const data = await UniUniApiClient.getWebhookLogs();
       if (data.success && data.logs) {
         setLogs(data.logs);
         if (!activeLog && data.logs.length > 0) {
@@ -50,18 +50,13 @@ export const WebhookView: React.FC<WebhookViewProps> = ({ shipments }) => {
   const handleSimulateWebhook = async () => {
     setIsFiring(true);
     try {
-      const res = await fetch('/api/uniuni/webhooks/simulate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          eventType,
-          targetUrl,
-          secretKey,
-          shipmentId: selectedShipmentId,
-        }),
+      const data = await UniUniApiClient.simulateWebhook({
+        eventType,
+        targetUrl,
+        secretKey,
+        shipmentId: selectedShipmentId,
       });
 
-      const data = await res.json();
       if (data.success && data.log) {
         setLogs([data.log, ...logs]);
         setActiveLog(data.log);

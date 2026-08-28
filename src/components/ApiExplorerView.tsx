@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ApiEndpointDefinition, UniUniConfig } from '../types/uniuni';
 import { API_ENDPOINTS } from '../data/apiEndpoints';
+import { UniUniApiClient } from '../services/apiClient';
 import {
   Code2,
   Play,
@@ -75,21 +76,16 @@ export const ApiExplorerView: React.FC<ApiExplorerViewProps> = ({ config, onOpen
     }
 
     try {
-      const res = await fetch('/api/uniuni/proxy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          url: fullUrl,
-          method: selectedEndpoint.method,
-          headers: {
-            Authorization: `Bearer ${config.accessToken || 'demo_uniuni_access_token'}`,
-          },
-          body: parsedBody,
-          mockFallback: selectedEndpoint.responseSchemaExample,
-        }),
+      const data = await UniUniApiClient.executeApiExplorer({
+        url: fullUrl,
+        method: selectedEndpoint.method,
+        headers: {
+          Authorization: `Bearer ${config.accessToken || 'demo_uniuni_access_token'}`,
+        },
+        body: parsedBody,
+        mockFallback: selectedEndpoint.responseSchemaExample,
       });
 
-      const data = await res.json();
       setResponseResult(data);
     } catch (err: any) {
       setResponseResult({

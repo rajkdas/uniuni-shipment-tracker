@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Shipment, UniUniConfig, BatchManifest } from './types/uniuni';
+import { UniUniApiClient } from './services/apiClient';
 import { Header } from './components/Header';
 import { ShipmentsView } from './components/ShipmentsView';
 import { TrackingView } from './components/TrackingView';
@@ -51,8 +52,7 @@ export default function App() {
   const fetchShipments = async () => {
     setIsLoadingShipments(true);
     try {
-      const res = await fetch('/api/uniuni/shipments');
-      const data = await res.json();
+      const data = await UniUniApiClient.getShipments();
       if (data.success && data.shipments) {
         setShipments(data.shipments);
       }
@@ -70,10 +70,7 @@ export default function App() {
 
   const handlePurchaseShipment = async (shipmentId: string) => {
     try {
-      const res = await fetch(`/api/uniuni/shipments/${shipmentId}/purchase`, {
-        method: 'POST',
-      });
-      const data = await res.json();
+      const data = await UniUniApiClient.purchaseShipment(shipmentId);
       if (data.success) {
         // Refresh shipments list
         fetchShipments();
@@ -91,10 +88,7 @@ export default function App() {
   const handleCancelShipment = async (shipmentId: string) => {
     if (!confirm('Are you sure you want to cancel and void this shipment label?')) return;
     try {
-      const res = await fetch(`/api/uniuni/shipments/${shipmentId}/cancel`, {
-        method: 'POST',
-      });
-      const data = await res.json();
+      const data = await UniUniApiClient.cancelShipment(shipmentId);
       if (data.success) {
         fetchShipments();
       }
@@ -105,12 +99,7 @@ export default function App() {
 
   const handleAdvanceMilestone = async (shipmentId: string, nextStatus: string) => {
     try {
-      const res = await fetch(`/api/uniuni/shipments/${shipmentId}/advance`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nextStatus }),
-      });
-      const data = await res.json();
+      const data = await UniUniApiClient.advanceMilestone(shipmentId, nextStatus);
       if (data.success) {
         fetchShipments();
       }
@@ -121,16 +110,11 @@ export default function App() {
 
   const handleCreateBatchFromSelection = async (selectedIds: string[]) => {
     try {
-      const res = await fetch('/api/uniuni/batches', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          shipmentIds: selectedIds,
-          hubCode: 'YYZ-01 (Toronto Gateway)',
-          driverName: 'Assigned Uni Courier',
-        }),
+      const data = await UniUniApiClient.createBatch({
+        shipmentIds: selectedIds,
+        hubCode: 'YYZ-01 (Toronto Gateway)',
+        driverName: 'Assigned Uni Courier',
       });
-      const data = await res.json();
       if (data.success) {
         setActiveTab('batches');
       }
